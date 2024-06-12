@@ -179,7 +179,7 @@ describe("Order repository test", () => {
     });
   });
 
-  it("should get a order created", async () => {
+  it("should get an order created", async () => {
     const customer = new Customer("123", "Customer 1");
     customer.changeAddress(new Address("Street 1", 1, "Zipcode 1", "City 1"));
     await customerRepository.create(customer);
@@ -194,11 +194,58 @@ describe("Order repository test", () => {
       product.id,
       2
     );
-    const order = new Order("123", "123", [orderItem]);
+    const order = new Order("123", customer.id, [orderItem]);
     await orderRepository.create(order);
 
     const orderSaved = await orderRepository.find(order.id);
 
     expect(orderSaved).toStrictEqual(order);
+  });
+
+  it("should get a list of orders created", async () => {
+    const customer = new Customer("123", "Customer 1");
+    const customer2 = new Customer("321", "Customer 2");
+    customer.changeAddress(new Address("Street 1", 1, "Zipcode 1", "City 1"));
+    customer2.changeAddress(new Address("Street 2", 2, "Zipcode 2", "City 2"));
+
+    await Promise.all([
+      customerRepository.create(customer),
+      customerRepository.create(customer2),
+    ]);
+
+    const product = new Product("123", "Product 1", 10);
+    const product2 = new Product("321", "Product 2", 50);
+
+    await Promise.all([
+      productRepository.create(product),
+      productRepository.create(product2),
+    ]);
+
+    const orderItem = new OrderItem(
+      "1",
+      product.name,
+      product.price,
+      product.id,
+      2
+    );
+    const orderItem2 = new OrderItem(
+      "2",
+      product2.name,
+      product2.price,
+      product2.id,
+      2
+    );
+
+    const order = new Order("123", customer.id, [orderItem]);
+    const order2 = new Order("321", customer2.id, [orderItem2]);
+
+    await orderRepository.create(order);
+    await orderRepository.create(order2);
+
+    const ordersSaved = await orderRepository.findAll();
+
+    expect(ordersSaved).toHaveLength(2);
+    expect(ordersSaved[0]).toStrictEqual(order);
+    expect(ordersSaved[1]).toStrictEqual(order2);
   });
 });
