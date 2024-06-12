@@ -37,9 +37,12 @@ export default class OrderRepository implements OrderRepositoryInterface {
     });
 
     itemsSavedMap.forEach((itemSaved) => {
-      const exist = entity.items.some((item) => item.id === itemSaved.id);
+      const itemAlreadySaved = entity.items.find(
+        (item) => item.id === itemSaved.id
+      );
 
-      if (exist) itemsToUpdateMap.set(itemSaved.id, itemSaved);
+      if (itemAlreadySaved)
+        itemsToUpdateMap.set(itemAlreadySaved.id, itemAlreadySaved);
       else itemsToRemoveMap.set(itemSaved.id, itemSaved);
     });
 

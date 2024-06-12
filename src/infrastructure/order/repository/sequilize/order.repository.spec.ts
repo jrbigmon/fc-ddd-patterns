@@ -90,7 +90,14 @@ describe("Order repository test", () => {
     await customerRepository.create(customer);
 
     const product = new Product("123", "Product 1", 10);
-    await productRepository.create(product);
+    const product2 = new Product("1234", "Product 2", 20);
+    const product3 = new Product("12345", "Product 3", 30);
+
+    await Promise.all([
+      await productRepository.create(product),
+      await productRepository.create(product2),
+      await productRepository.create(product3),
+    ]);
 
     const orderItem = new OrderItem(
       "1",
@@ -99,8 +106,16 @@ describe("Order repository test", () => {
       product.id,
       2
     );
+    const orderItem2 = new OrderItem(
+      "2",
+      product2.name,
+      product2.price,
+      product2.id,
+      1
+    );
+
     const orderId = "123";
-    let order = new Order(orderId, customer.id, [orderItem]);
+    let order = new Order(orderId, customer.id, [orderItem, orderItem2]);
     await orderRepository.create(order);
 
     let orderModel = await OrderModel.findOne({
@@ -121,22 +136,18 @@ describe("Order repository test", () => {
           order_id: order.id,
           product_id: product.id,
         },
+        {
+          id: orderItem2.id,
+          name: orderItem2.name,
+          price: orderItem2.price,
+          quantity: orderItem2.quantity,
+          order_id: order.id,
+          product_id: product2.id,
+        },
       ],
     });
 
-    const product2 = new Product("1234", "Product 2", 20);
-    const product3 = new Product("12345", "Product 3", 30);
-
-    await productRepository.create(product2);
-    await productRepository.create(product3);
-
-    const orderItem2 = new OrderItem(
-      "2",
-      product2.name,
-      product2.price,
-      product2.id,
-      1
-    );
+    orderItem2.changeQuantity(3);
     const orderItem3 = new OrderItem(
       "3",
       product3.name,
