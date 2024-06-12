@@ -178,4 +178,27 @@ describe("Order repository test", () => {
       ],
     });
   });
+
+  it("should get a order created", async () => {
+    const customer = new Customer("123", "Customer 1");
+    customer.changeAddress(new Address("Street 1", 1, "Zipcode 1", "City 1"));
+    await customerRepository.create(customer);
+
+    const product = new Product("123", "Product 1", 10);
+    await productRepository.create(product);
+
+    const orderItem = new OrderItem(
+      "1",
+      product.name,
+      product.price,
+      product.id,
+      2
+    );
+    const order = new Order("123", "123", [orderItem]);
+    await orderRepository.create(order);
+
+    const orderSaved = await orderRepository.find(order.id);
+
+    expect(orderSaved).toStrictEqual(order);
+  });
 });
